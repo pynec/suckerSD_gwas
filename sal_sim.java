@@ -85,7 +85,7 @@ public List<List<String>> genotype_file(List<List<String>> geno_matrix){
 		Integer rand_snp;
 		//set chromosome depending on whether the loci is sex specific or not 
 		if(sex_spec_list.contains(i)) { rand_snp = chr_sal; }
-		else { rand_snp = (int)(Math.random()*((nchr-1) +1)) +1; }
+		else { rand_snp = (int)(Math.random()*((nloci-1) +1)) +1;	}
 		chr_num_list.add(rand_snp.toString());
 		String snp_info= snp + rand_snp.toString();
 		anno_list.add(snp_info);
@@ -144,8 +144,7 @@ public List<List<String>> anno_file(){
 	List<List<String>> anno = new ArrayList<>();
 	for(int i = 0; i < nloci; i++) {
 		List<String> anno_row = new ArrayList<>();
-		int SNP_ID = (int)(Math.random()*((10-1)+1))+1;
-		anno_row.add(chr_list.get(i) + SNP_ID);
+		anno_row.add(chr_list.get(i));
 		Integer bp_pos = (int)(Math.random()*((10000000-1000000)+1000000))+1000000;;
 		anno_row.add(bp_pos.toString());
 		anno_row.add(chr_num.get(i));
@@ -156,7 +155,7 @@ public List<List<String>> anno_file(){
 
 //method that writes the output to a file 
 public static void write_to_file(List<List<String>> output) throws IOException {
-	FileWriter writer = new FileWriter("geno_sal_10.txt");
+	FileWriter writer = new FileWriter("test.txt");
 	for(List<String> row : output) {
 		writer.write(row + System.lineSeparator());
 	}
@@ -164,7 +163,7 @@ public static void write_to_file(List<List<String>> output) throws IOException {
 }
 //method that writes the phenotype output to a file 
 public static void write_pheno_file(List<Integer> output) throws IOException {
-	FileWriter writer = new FileWriter("pheno_sal_10.txt");
+	FileWriter writer = new FileWriter("test2.txt");
 	for(int i = 0; i < output.size(); i++) {
 		writer.write(output.get(i) + System.lineSeparator());
 	}
@@ -172,7 +171,7 @@ public static void write_pheno_file(List<Integer> output) throws IOException {
 }
 //method that writes the annotation output to a file 
 public static void write_anno_file(List<List<String>> output) throws IOException {
-	FileWriter writer = new FileWriter("anno_sal_10.txt");
+	FileWriter writer = new FileWriter("test3.txt");
 
 	for(List<String> row : output) {
 		String x = row.toString().replaceAll("(,)" , "");
