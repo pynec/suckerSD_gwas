@@ -36,12 +36,15 @@ variants = read.csv(args[4], nrows = nloci, skip = 1, header = F)
 
 chr = variants$V1
 pos = variants$V2 
-
+new_chr = vector("character", length = nloci)
+for(i in 1:nloci){
+      new_chr[i] = paste0(chr[i], sample(1:50,1))
+}
 ##output to add to genotype file (with chr information and commas - for GEMMA)
 output =  data.frame(matrix(ncol = nind + 1, nrow = nloci))
 
 for(i in 1:nloci){
-      output[i, 1] = paste0(chr[i], ", ", "x", ", ", "x")
+      output[i, 1] = paste0(new_chr[i], ", ", "x", ", ", "x")
       index = 0
       for(j in 2:(nind+2)){
       	    if(j == nind +2){
@@ -55,20 +58,20 @@ colnames(output) = NULL
 
 ##setting up genotype file
 for(i in 1:nloci){
-      write.table(output[i,], "geno_real_68186.txt", append = TRUE, row.names = FALSE, quote = FALSE)
+      write.table(output[i,], "geno_68186_real.txt", append = TRUE, row.names = FALSE, quote = FALSE)
 }
 
 
 ##output for annotation file
 anno = data.frame(matrix(ncol = 1, nrow = nloci))
 for(i in 1:nloci){
-anno[i,] = paste0(chr[i], sample(1:20,1), " ", pos[i], " ", chr[i])
+anno[i,] = paste0(new_chr[i], " ", pos[i], " ", chr[i])
 }
 colnames(anno) = NULL
 
 ##setting up annotation file
 for(i in 1:nloci){
-      write.table(anno[i,], "anno_real_68186.txt", append = TRUE, row.names = FALSE, quote = FALSE)
+      write.table(anno[i,], "anno_68186_real.txt", append = TRUE, row.names = FALSE, quote = FALSE)
       }
 
 ##getting sex information on the individuals for phenotype file
