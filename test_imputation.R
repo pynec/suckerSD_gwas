@@ -1,0 +1,91 @@
+#imputation script for running on a high performance computing cluster 
+library(rhdf5)
+library(stringi)
+
+args <- commandArgs(trailingOnly = TRUE)
+
+gprob1 = h5read(args[1], "gprob")
+gprob2 = h5read(args[2], "gprob")
+gprob3 = h5read(args[3], "gprob")
+
+##following adjusted from hdf52rdata.R from beurklelab bitbucket
+ploidy <- dim(gprob1)[1] - 1
+
+gp_mean1 <- apply(gprob1, c(2,3), function(x){sum(x*(0:ploidy))})
+gp_mean2 <- apply(gprob2, c(2,3), function(x){sum(x*(0:ploidy))})
+gp_mean3 <- apply(gprob3, c(2,3), function(x){sum(x*(0:ploidy))})
+
+gp.mean <- (gp_mean1+gp_mean2+gp_mean3)/3
+#gp.mean <- (gp_mean1+ gp_mean2)/2
+
+nind = 46
+nloci = 59295
+
+##testing with all loci 
+
+##data frame to add genotype likelihoods to (GL for each loci and ind)
+
+test_df = data.frame(matrix(ncol = nind, nrow = nloci))
+
+for(i in 1:nloci){
+      test_df[i, ] = gp.mean[, i]
+ }
+ 
+colnames(test_df) = NULL
+
+variants = read.csv(args[4], nrows = nloci, skip = 1, header = F)
+
+chr = variants$V1
+pos = variants$V2 
+new_chr = vector("character", length = nloci)
+for(i in 1:nloci){
+      new_chr[i] = paste0(chr[i], sample(1:50,1))
+}
+##output to add to genotype file (with chr information and commas - for GEMMA)
+output =  data.frame(matrix(ncol = nind + 1, nrow = nloci))
+
+alleles = read.table(args[5], nrows = nloci, header = F)
+al = data.frame(lapply(alleles,as.character), stringAsFactors=FALSE)
+al[] = lapply(alleles,as.character)
+
+for(i in 1:nloci){
+      output[i, 1] = paste0(new_chr[i], ", ", as.character(al[i,][1]), ", ", as.character(al[i,][2]))
+      index = 0
+      for(j in 2:(nind+2)){
+      	    if(j == nind +2){
+	    output[i,j] = paste0(test_df[i,index])
+	    }
+	    else{
+	    output[i,j] = paste0(test_df[i,index], ", ")
+	    index = index + 1
+	    } } }
+colnames(output) = NULL
+
+##setting up genotype file
+for(i in 1:nloci){
+      write.table(output[i,], "geno_bw_a_noPF_miss0.5_mac3_Q20_0.9ind_thin90_maf0.05.txt", append = TRUE, row.names = FALSE, quote = FALSE)
+}
+
+
+##output for annotation file
+anno = data.frame(matrix(ncol = 1, nrow = nloci))
+for(i in 1:nloci){
+anno[i,] = paste0(new_chr[i], " ", pos[i], " ", chr[i])
+}
+colnames(anno) = NULL
+
+##setting up annotation file
+for(i in 1:nloci){
+      write.table(anno[i,], "anno_bw_a_noPF_miss0.5_mac3_Q20_0.9ind_thin90_maf0.05.txt", append = TRUE, row.names = FALSE, quote = FALSE)
+      }
+
+##getting sex information on the individuals for phenotype file
+details = read.csv(args[6], header = T)
+sex = details$sex
+sex = gsub("PF", "1", sex) 
+sex = gsub("M", "0", sex)
+sex = gsub("F", "1", sex)
+
+write.table(sex, "pheno_bw_a_noPF_miss0.5_mac3_Q20_thin90_maf0.05.txt", append = TRUE, row.names = FALSE, quote = FALSE)
+
+
