@@ -39,7 +39,7 @@ chr = variants$V1
 pos = variants$V2 
 new_chr = vector("character", length = nloci)
 for(i in 1:nloci){
-      new_chr[i] = paste0(chr[i], sample(1:50,1))
+      new_chr[i] = paste0(chr[i], i)
 }
 ##output to add to genotype file (with chr information and commas - for GEMMA)
 output =  data.frame(matrix(ncol = nind + 1, nrow = nloci))
@@ -63,7 +63,7 @@ colnames(output) = NULL
 
 ##setting up genotype file
 for(i in 1:nloci){
-      write.table(output[i,], "geno_bw_a_noPF_miss0.5_mac3_Q20_0.9ind_thin90_maf0.05.txt", append = TRUE, row.names = FALSE, quote = FALSE)
+      write.table(output[i,], "geno_bw_PFasF.txt", append = TRUE, row.names = FALSE, quote = FALSE)
 }
 
 
@@ -76,7 +76,7 @@ colnames(anno) = NULL
 
 ##setting up annotation file
 for(i in 1:nloci){
-      write.table(anno[i,], "anno_bw_a_noPF_miss0.5_mac3_Q20_0.9ind_thin90_maf0.05.txt", append = TRUE, row.names = FALSE, quote = FALSE)
+      write.table(anno[i,], "anno_bw_PFasF.txt", append = TRUE, row.names = FALSE, quote = FALSE)
       }
 
 ##getting sex information on the individuals for phenotype file
@@ -86,6 +86,6 @@ sex = gsub("PF", "1", sex)
 sex = gsub("M", "0", sex)
 sex = gsub("F", "1", sex)
 
-write.table(sex, "pheno_bw_a_noPF_miss0.5_mac3_Q20_thin90_maf0.05.txt", append = TRUE, row.names = FALSE, quote = FALSE)
+write.table(sex, "pheno_bw_PFasF.txt", append = FALSE, row.names = FALSE, quote = FALSE, col.names = FALSE)
 
 
